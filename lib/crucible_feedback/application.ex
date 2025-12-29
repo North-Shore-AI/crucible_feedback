@@ -9,7 +9,7 @@ defmodule CrucibleFeedback.Application do
   @doc false
   def start(_type, _args) do
     storage = Application.get_env(:crucible_feedback, :storage)
-    start_repo = Application.get_env(:crucible_feedback, :start_repo, true)
+    start_repo = Application.get_env(:crucible_feedback, :start_repo, false)
     start_ingestion = Application.get_env(:crucible_feedback, :start_ingestion, true)
 
     children =

@@ -31,18 +31,21 @@
 
 ```elixir
 # mix.exs
-{:crucible_feedback, "~> 0.1.0"}
+{:crucible_feedback, "~> 0.2.0"}
 ```
 
 ## Configuration
 
+### Database Configuration (Oban Pattern)
+
+CrucibleFeedback uses dynamic repo injection - your host application provides the Repo:
+
 ```elixir
 # config/config.exs
 config :crucible_feedback,
-  ecto_repos: [CrucibleFeedback.Repo],
+  repo: MyApp.Repo,  # Required when using Ecto storage
   storage: CrucibleFeedback.Storage.Ecto,
   embedding_client: CrucibleFeedback.EmbeddingClient.Noop,
-  start_repo: true,
   start_ingestion: true,
   ingestion: [
     flush_interval: :timer.seconds(5),
@@ -69,6 +72,47 @@ config :crucible_feedback,
     min_quality_score: 0.8,
     max_hard_quality: 0.5
   ]
+
+# Your host app's Repo configuration
+config :my_app, MyApp.Repo,
+  database: "my_app_dev",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"
+```
+
+Then start your Repo in your application's supervision tree:
+
+```elixir
+# lib/my_app/application.ex
+children = [
+  MyApp.Repo,
+  # ... other children
+]
+```
+
+### Migrations
+
+Copy migrations from `deps/crucible_feedback/priv/repo/migrations/` or run:
+
+```bash
+mix crucible_feedback.install
+```
+
+### Legacy Mode
+
+For backwards compatibility, set `start_repo: true` to auto-start internal Repo:
+
+```elixir
+config :crucible_feedback,
+  start_repo: true,
+  ecto_repos: [CrucibleFeedback.Repo]
+
+config :crucible_feedback, CrucibleFeedback.Repo,
+  database: "crucible_feedback_dev",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"
 ```
 
 ## Usage
@@ -122,7 +166,26 @@ CrucibleFeedback.export_preference_pairs("deploy-1")
 CrucibleFeedback.check_triggers("deploy-1")
 ```
 
-### Crucible Stages
+## Feedback Stages
+
+This package provides Crucible stages for feedback loop management:
+
+- `:export_feedback` - Export collected feedback data for model retraining
+- `:check_triggers` - Check retraining triggers based on feedback signals and drift
+
+All stages implement the `Crucible.Stage` behaviour with full describe/1 schemas.
+
+### Options (Export Feedback)
+- `:format` - Export format (`:jsonl`, `:parquet`, `:csv`)
+- `:output_path` - Output file path
+- `:filters` - Filters to apply to exported data
+
+### Options (Check Triggers)
+- `:threshold` - Trigger threshold
+- `:window_hours` - Time window for trigger evaluation
+- `:trigger_types` - Types of triggers to check (`:drift`, `:accuracy`, `:volume`, `:feedback`)
+
+### Stage Usage
 
 ```elixir
 CrucibleFeedback.Stages.ExportFeedback.run(context, format: :jsonl)

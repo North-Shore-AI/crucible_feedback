@@ -1,9 +1,41 @@
 defmodule CrucibleFeedback do
   @moduledoc """
   Production feedback loop for ML systems.
+
+  ## Database Configuration
+
+  CrucibleFeedback requires a Repo for persistence when using the Ecto storage backend.
+  Configure it in your host application:
+
+      config :crucible_feedback, repo: MyApp.Repo
+
+  Then start your Repo in your supervision tree. Run migrations:
+
+      mix crucible_feedback.install
+
+  Or copy migrations from `deps/crucible_feedback/priv/repo/migrations/`.
   """
 
   alias CrucibleFeedback.{Curation, Drift, Export, Ingestion, Quality, Signals, Triggers}
+
+  @doc """
+  Returns the configured Repo module.
+
+  Raises if not configured. Configure with:
+
+      config :crucible_feedback, repo: MyApp.Repo
+  """
+  @spec repo() :: module()
+  def repo do
+    Application.get_env(:crucible_feedback, :repo) ||
+      raise ArgumentError, """
+      CrucibleFeedback requires a :repo configuration when using Ecto storage.
+
+      Add to your config:
+
+          config :crucible_feedback, repo: MyApp.Repo
+      """
+  end
 
   @type drift_result :: Drift.drift_result()
 

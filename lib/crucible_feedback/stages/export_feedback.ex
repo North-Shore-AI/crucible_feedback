@@ -10,9 +10,25 @@ defmodule CrucibleFeedback.Stages.ExportFeedback do
     @behaviour Crucible.Stage
   end
 
+  @impl true
+  def describe(_opts) do
+    %{
+      name: :export_feedback,
+      description: "Exports collected feedback data for model retraining",
+      required: [],
+      optional: [:format, :output_path, :filters],
+      types: %{
+        format: {:enum, [:jsonl, :parquet, :csv]},
+        output_path: :string,
+        filters: :map
+      }
+    }
+  end
+
   @doc """
   Run the export stage and attach the output path to the context.
   """
+  @impl true
   @spec run(any(), map()) :: {:ok, any()} | {:error, term()}
   def run(context, opts) do
     deployment_id = Crucible.Context.get_artifact(context, :deployment_id)

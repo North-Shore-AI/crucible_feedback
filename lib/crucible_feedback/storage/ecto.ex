@@ -7,8 +7,9 @@ defmodule CrucibleFeedback.Storage.Ecto do
 
   import Ecto.Query
 
-  alias CrucibleFeedback.Repo
   alias CrucibleFeedback.Schemas.{CuratedExample, InferenceEvent, UserSignal}
+
+  defp repo, do: CrucibleFeedback.repo()
 
   @doc false
   @impl true
@@ -35,7 +36,7 @@ defmodule CrucibleFeedback.Storage.Ecto do
         ])
       end)
 
-    Repo.insert_all(InferenceEvent, entries)
+    repo().insert_all(InferenceEvent, entries)
     :ok
   end
 
@@ -44,7 +45,7 @@ defmodule CrucibleFeedback.Storage.Ecto do
   def insert_signal(signal) do
     struct = struct(UserSignal, signal)
 
-    case Repo.insert(struct) do
+    case repo().insert(struct) do
       {:ok, record} -> {:ok, record}
       {:error, reason} -> {:error, reason}
     end
@@ -66,7 +67,7 @@ defmodule CrucibleFeedback.Storage.Ecto do
     query = if limit, do: from(event in query, limit: ^limit), else: query
     query = if include_signals, do: preload(query, [:signals]), else: query
 
-    Repo.all(query)
+    repo().all(query)
   end
 
   @doc false
@@ -81,14 +82,14 @@ defmodule CrucibleFeedback.Storage.Ecto do
   @doc false
   @impl true
   def update_event(event_id, attrs) do
-    case Repo.get(InferenceEvent, event_id) do
+    case repo().get(InferenceEvent, event_id) do
       nil ->
         {:error, :not_found}
 
       event ->
         event
         |> InferenceEvent.changeset(attrs)
-        |> Repo.update()
+        |> repo().update()
         |> case do
           {:ok, _} -> :ok
           {:error, reason} -> {:error, reason}
@@ -122,7 +123,7 @@ defmodule CrucibleFeedback.Storage.Ecto do
         ])
       end)
 
-    Repo.insert_all(CuratedExample, entries)
+    repo().insert_all(CuratedExample, entries)
     :ok
   end
 
@@ -143,14 +144,14 @@ defmodule CrucibleFeedback.Storage.Ecto do
 
     query = if limit, do: from(example in query, limit: ^limit), else: query
 
-    Repo.all(query)
+    repo().all(query)
   end
 
   @doc false
   @impl true
   def mark_curated_exported(ids, batch_id) do
     from(example in CuratedExample, where: example.id in ^ids)
-    |> Repo.update_all(
+    |> repo().update_all(
       set: [exported: true, export_batch_id: batch_id, updated_at: DateTime.utc_now()]
     )
 
@@ -171,21 +172,21 @@ defmodule CrucibleFeedback.Storage.Ecto do
         _ -> query
       end
 
-    Repo.aggregate(query, :count)
+    repo().aggregate(query, :count)
   end
 
   @doc false
   @impl true
   def count_events(deployment_id, _opts) do
     from(event in InferenceEvent, where: event.deployment_id == ^deployment_id)
-    |> Repo.aggregate(:count)
+    |> repo().aggregate(:count)
   end
 
   @doc false
   @impl true
   def list_signals_for_event(event_id) do
     from(signal in UserSignal, where: signal.inference_event_id == ^event_id)
-    |> Repo.all()
+    |> repo().all()
   end
 
   @doc false
@@ -196,6 +197,6 @@ defmodule CrucibleFeedback.Storage.Ecto do
       on: signal.inference_event_id == event.id,
       where: event.deployment_id == ^deployment_id
     )
-    |> Repo.all()
+    |> repo().all()
   end
 end

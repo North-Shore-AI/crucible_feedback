@@ -10,9 +10,25 @@ defmodule CrucibleFeedback.Stages.CheckTriggers do
     @behaviour Crucible.Stage
   end
 
+  @impl true
+  def describe(_opts) do
+    %{
+      name: :check_triggers,
+      description: "Checks retraining triggers based on feedback signals and drift detection",
+      required: [],
+      optional: [:threshold, :window_hours, :trigger_types],
+      types: %{
+        threshold: :float,
+        window_hours: :integer,
+        trigger_types: {:list, {:enum, [:drift, :accuracy, :volume, :feedback]}}
+      }
+    }
+  end
+
   @doc """
   Run trigger checks and attach results to the context.
   """
+  @impl true
   @spec run(any(), map()) :: {:ok, any()} | {:error, term()}
   def run(context, opts) do
     deployment_id = Crucible.Context.get_artifact(context, :deployment_id)

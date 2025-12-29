@@ -1,14 +1,14 @@
 defmodule CrucibleFeedback.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
   @source_url "https://github.com/North-Shore-AI/crucible_feedback"
 
   def project do
     [
       app: :crucible_feedback,
       version: @version,
-      elixir: "~> 1.18",
+      elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -35,7 +35,7 @@ defmodule CrucibleFeedback.MixProject do
     [
       # Database
       {:ecto_sql, "~> 3.11"},
-      {:postgrex, "~> 0.18"},
+      {:postgrex, ">= 0.21.1"},
 
       # JSON
       {:jason, "~> 1.4"},
@@ -45,11 +45,11 @@ defmodule CrucibleFeedback.MixProject do
       {:scholar, "~> 0.3", optional: true},
 
       # Crucible integration (optional)
-      {:crucible_framework, "~> 0.4.0"},
-      {:crucible_ir, "~> 0.2.0"},
+      {:crucible_framework, "~> 0.5.2"},
+      {:crucible_ir, "~> 0.2.1"},
 
       # Telemetry
-      {:telemetry, "~> 1.2"},
+      {:telemetry, "~> 1.3"},
 
       # Testing
       {:mox, "~> 1.1", only: :test},

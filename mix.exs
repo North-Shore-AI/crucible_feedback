@@ -34,31 +34,31 @@ defmodule CrucibleFeedback.MixProject do
   defp deps do
     [
       # Database
-      {:ecto_sql, "~> 3.11"},
-      {:postgrex, ">= 0.21.1"},
+      {:ecto_sql, "~> 3.14"},
+      {:postgrex, "~> 0.22.3"},
 
       # JSON
       {:jason, "~> 1.4"},
 
       # Statistics (for drift detection)
-      {:nx, "~> 0.7"},
-      {:scholar, "~> 0.3", optional: true},
+      {:nx, "~> 0.12.1"},
+      {:scholar, "~> 0.4.2", optional: true},
 
       # Crucible integration (optional)
       {:crucible_framework, "~> 0.5.2"},
-      {:crucible_ir, "~> 0.2.1"},
+      {:crucible_ir, "~> 0.3.0", override: true},
 
       # Telemetry
-      {:telemetry, "~> 1.3"},
+      {:telemetry, "~> 1.4"},
 
       # Testing
-      {:mox, "~> 1.1", only: :test},
-      {:ex_machina, "~> 2.7", only: :test},
+      {:mox, "~> 1.2", only: :test},
+      {:ex_machina, "~> 2.8", only: :test},
 
       # Quality
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.40.0", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.40.3", only: :dev, runtime: false}
     ]
   end
 
